@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+
+    environment {
+        // Your GitHub credentials ID
+        GITHUB_CREDS = '765b1eac-5647-3461-8jkc-9fe45hh53c2972' 
+    }
+
+    stages {
+        stage('git pull') {
+            steps {
+                // Cloning the repository from GitHub
+                git url: 'You Github repo link',
+                credentialsId: "${env.GITHUB_CREDS}",
+                branch: 'main'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                // Running Flutter tests
+                bat 'flutter test'
+            }
+        }
+
+        stage('Build Android APK') {
+            steps {
+                // Building the APK in release mode
+                bat 'flutter build apk'
+            }
+        }
+        
+        stage('Archive APK') {
+            steps {
+                // Archiving the release APK
+                archiveArtifacts artifacts: '**/build/app/outputs/flutter-apk/app-release.apk', allowEmptyArchive: false
+            }
+        }
+    }
+       
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
